@@ -541,6 +541,8 @@ class Node(NodeProtocol):
             try:
                 params: TParamEntry = self.ParamsDictionary[index][subindex]  # type: ignore[literal-required]
                 bs = params["buffer_size"]
+                if isinstance(bs, str):
+                    bs = int(bs)
                 if bs <= 8:
                     return (index << 16) + (subindex << 8) + size * bs
                 raise ValueError(f"String size of '{name}' too big to fit in a PDO")

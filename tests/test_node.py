@@ -27,6 +27,24 @@ def test_node_pdo_mapping_choices():
     assert node.GetMapList() == ["None"]
 
 
+def test_node_pdo_mapping_string_buffer_size_as_text():
+    node = Node()
+    node.UserMapping[0x2000] = {
+        "name": "Mapped object",
+        "struct": OD.RECORD,
+        "need": False,
+        "values": [
+            {"name": "Count", "type": 0x05, "access": "ro", "pdo": False},
+            {"name": "Payload", "type": 0x09, "access": "rw", "pdo": True},
+        ],
+    }
+    node.AddEntry(0x2000, value=["abc"])
+    node.SetParamsEntry(0x2000, 1, params={"buffer_size": "3"})
+
+    mapname = node.GenerateMapName("Payload", 0x2000, 1)
+    assert node.GetMapValue(mapname) == (0x2000 << 16) + (1 << 8) + 24
+
+
 @pytest.mark.parametrize("source", ["UserMapping", "Profile", "DS302"])
 @pytest.mark.parametrize("struct", [OD.ARRAY, OD.RECORD])
 @pytest.mark.parametrize("objtype, value, size", [(0x05, 0, 8), (0x09, "abc", 24)])
